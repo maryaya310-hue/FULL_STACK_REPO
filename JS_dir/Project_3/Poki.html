@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title></title>
+  <link rel="stylesheet" href="CSS.css">
+</head>
+<body>
+
+  <div id="app">
+    <header class="main-header">
+      <img src="https://raw.githubusercontent.com/PokeAPI/media/master/logo/pokeapi_256.png" alt="PokéAPI Logo" class="logo">
+      <h1>PokéFetch<span class="plus">+</span></h1>
+    </header>
+    <div class="controls">
+      <input type="text" id="searchInput" placeholder="Nom ou ID du Pokémon (ex: pikachu, 25)">
+      <button id="searchBtn">Search</button>
+      <button id="surpriseBtn">Surprise me</button>
+      <button id="cancelBtn">Cancel</button>
+    </div>
+
+    <div id="status"></div>
+
+    <section id="results" class="card hidden">
+      <!-- Pokémon info will be rendered here -->
+    </section>
+
+    <aside id="history" class="history-panel">
+      <h3><span class="history-icon">🕑</span> Last 10 Searches</h3>
+      <ul id="historyList"></ul>
+    </aside>
+  </div>
+
+  <script src="JS.js"></script>
+</body>
+</html>
