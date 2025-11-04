@@ -1,0 +1,216 @@
+<!DOCTYPE html> <!-- Déclare que c’est un document HTML5 -->
+<html lang="fr"> <!-- Langue de la page : français -->
+<head>
+  <meta charset="utf-8" /> <!-- Encodage UTF-8 pour les accents et caractères spéciaux -->
+  <title>Caisse Enregistreuse — Maryam Shopping</title> <!-- Titre de l’onglet -->
+  <link rel="icon" type="image/png" href="photo.jpg"> <!-- Favicon affiché dans l’onglet c'est image -->
+  <meta name="viewport" content="width=device-width,initial-scale=1" /> <!-- Rendre la page responsive -->
+  
+  <style>
+    /* Style général du corps de la page */
+    body {  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; max-width: 900px; margin: 30px auto; padding: 0 16px; color:#111; }
+    h1 { font-size: 1.6rem; margin-bottom: 8px; } /* Style du titre principal */
+    .grid { display:grid; gap:10px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); align-items:end; margin-bottom:14px; } /* Grille pour formulaires */
+    label { display:block; font-size:0.85rem; margin-bottom:4px; } /* Style des labels */
+    input[type="text"], input[type="number"] { width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box; } /* Style des inputs */
+    button { padding:8px 12px; border-radius:8px; border: none; background:#710638; color:white; cursor:pointer; } /* Boutons principaux */
+    button.secondary { background:#ab0808; } /* Boutons secondaires */
+    table { width:100%; border-collapse:collapse; margin-top:10px; } /* Style des tableaux */
+    th, td { padding:8px 6px; border-bottom:1px solid #eee; text-align:left; } /* Cellules tableau */
+    .total { font-weight:700; font-size:1.1rem; margin-top:12px; } /* Total */
+    .message { margin-top:12px; padding:10px; border-radius:8px; background:#f1f7ff; color:#032b57; } /* Message paiement */
+    .small { font-size:0.9rem; color:#7f4b4b; } /* Petit texte */
+    .actions { display:flex; gap:8px; flex-wrap:wrap; } /* Conteneur pour boutons */
+    .remove-btn { background:#e03b3b; } /* Bouton supprimer */
+    .flex-row { display:flex; gap:10px; align-items:center; } /* Conteneur flex pour formulaire */
+    .profile-pic { text-align: center; margin: 20px 0; width: 180px; height: 190px; border-radius: 100%; } /* Conteneur photo ronde */
+    .profile-pic img { width: 100%; height: 100%; object-fit: cover; border-radius: 100%; } /* Image ronde */
+  </style>
+</head>
+
+<body>
+  <!-- Logo ou photo visible en haut -->
+  <div class="profile-pic">
+    <img src="photo.jpg" alt="Profile Picture"> <!-- Affiche la photo de profil -->
+  </div>
+
+  <h1>Caisse enregistreuse — Shopping With Maryam</h1> <!-- Titre principal de la page -->
+
+  <!-- Section pour ajouter un article -->
+  <section>
+    <div class="grid">
+      <div>
+        <label for="itemName">Nom de l'article</label> <!-- Label pour le nom -->
+        <input id="itemName" type="text" placeholder="Ex: Pomme" /> <!-- Input nom -->
+      </div>
+      <div>
+        <label for="itemPrice">Prix (dh)</label> <!-- Label pour le prix -->
+        <input id="itemPrice" type="number" min="0" step="0.01" placeholder="1.20" /> <!-- Input prix -->
+      </div>
+      <div>
+        <label>&nbsp;</label> <!-- espace pour alignement -->
+        <button id="addItemBtn">Add article</button> <!-- Bouton ajouter -->
+      </div>
+    </div>
+    <div class="small">Tu peux ajouter plusieurs articles. Clique sur la croix pour supprimer un article.</div>
+  </section>
+
+  <!-- Section réduction -->
+  <section style="margin-top:14px;">
+    <div style="display:flex; gap:10px; align-items:end; flex-wrap:wrap;">
+      <div style="min-width:160px;">
+        <label for="discountPercent">Réduction (%)</label> <!-- Label pour réduction -->
+        <input id="discountPercent" type="number" min="0" max="100" step="0.1" placeholder="10" /> <!-- Input réduction -->
+      </div>
+      <div style="align-self:stretch;">
+        <button id="applyDiscountBtn" class="secondary">Appliquer la réduction</button> <!-- Appliquer réduction -->
+      </div>
+      <div style="align-self:stretch;">
+        <button id="resetDiscountBtn" class="secondary">Réinitialiser la réduction</button> <!-- Réinitialiser réduction -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Section panier -->
+  <section style="margin-top:18px;">
+    <h2 style="font-size:1.1rem; margin-bottom:8px;">Panier</h2>
+    <div id="cartContainer">
+      <table id="cartTable" aria-live="polite">
+        <thead>
+          <tr><th>Article</th><th>Prix (dh)</th><th></th></tr> <!-- En-tête du tableau -->
+        </thead>
+        <tbody id="cartBody">
+          <!-- Lignes ajoutées dynamiquement via JS -->
+        </tbody>
+      </table>
+      <div class="total" id="totalLine">Total : 0.00 dh</div> <!-- Total du panier -->
+      <div class="small" id="discountLine">Réduction appliquée : 0 %</div> <!-- Affiche la réduction -->
+    </div>
+  </section>
+
+  <!-- Section paiement -->
+  <section style="margin-top:18px;">
+    <h2 style="font-size:1.1rem; margin-bottom:8px;">Paiement</h2>
+    <div class="flex-row" style="gap:8px;">
+      <div style="flex:1; max-width:220px;">
+        <label for="cashGiven">Espèces données (dh)</label> <!-- Label argent donné -->
+        <input id="cashGiven" type="number" min="0" step="0.01" placeholder="10.00" /> <!-- Input argent -->
+      </div>
+      <div>
+        <label>&nbsp;</label> <!-- espace -->
+        <div class="actions">
+          <button id="payBtn">Payer</button> <!-- Bouton payer -->
+          <button id="clearCartBtn" class="secondary">Vider le panier</button> <!-- Bouton vider -->
+        </div>
+      </div>
+    </div>
+    <div id="message" class="message d-none"></div> <!-- Zone de message paiement -->
+  </section>
+
+  <!-- JavaScript -->
+  <script>
+    document.body.style.background = "pink";
+    setTimeout => "".body.style.background = "pink";
+    class CashRegister {
+      constructor() {
+        this.cart = [];        // Tableau des articles
+        this.discountRate = 0; // Taux de réduction
+      }
+      addItem(name, price) {
+        this.cart.push({ name, price: Number(price) }); // Ajoute un article
+      }
+      removeItem(i) {
+        this.cart.splice(i, 1); // Supprime un article par index
+      }
+      clearCart() {
+        this.cart = [];        // Vide le panier
+        this.discountRate = 0; // Supprime réduction
+      }
+      setDiscountRateFromPercent(p) {
+        this.discountRate = p / 100; // Convertit % en taux
+      }
+      resetDiscount() {
+        this.discountRate = 0; // Remet la réduction à 0
+      }
+      computeTotal() {
+        return this.cart.reduce((acc, item) => acc + item.price, 0) * (1 - this.discountRate); // Calcul total avec réduction
+      }
+      getTotalFormatted() {
+        return this.computeTotal().toFixed(2); // Retourne le total avec 2 décimales
+      }
+      pay(cash) {
+        let total = this.computeTotal(); // Total à payer
+        if (cash >= total) {
+          return { ok: true, msg: `Paiement accepté ✅ Monnaie : ${(cash - total).toFixed(2)} dh` }; // Paiement réussi
+        } else {
+          return { ok: false, msg: `Fonds insuffisants ❌ Il manque ${(total - cash).toFixed(2)} dh` }; // Argent insuffisant
+        }
+      }
+    }
+
+    // DOM & Interaction
+    const caisse = new CashRegister(); // Création de la caisse
+    const cartBody = document.getElementById("cartBody"); // Tableau panier tradutionnel
+    const totalLine = document.getElementById("totalLine"); // Total affiché
+    const discountLine = document.getElementById("discountLine"); // Réduction affichée
+    const message = document.getElementById("message"); // Message paiement
+
+    function render() {
+      cartBody.innerHTML = ""; // Vide le tableau
+      caisse.cart.forEach((item, i) => {
+        cartBody.innerHTML += `
+          <tr>
+            <td>${item.name}</td> <!-- Nom article -->
+            <td>${item.price.toFixed(2)} dh</td> <!-- Prix article -->
+            <td><button class="remove-btn" onclick="removeItem(${i})">X</button></td> <!-- Supprimer -->
+          </tr>`;
+      });
+      totalLine.textContent = `Total : ${caisse.getTotalFormatted()} dh`; // Affiche total
+      discountLine.textContent = `Réduction appliquée : ${(caisse.discountRate * 100).toFixed(1)} %`; // Affiche réduction
+    }
+
+    function showMessage(text, ok) {
+      message.className = `message ${ok ? "alert-success" : "alert-danger"}`; // Choix couleur
+      message.textContent = text; // Texte message
+      message.style.display = "block"; // Affiche message
+    }
+
+    // Boutons
+    document.getElementById("addItemBtn").onclick = () => {
+      const name = document.getElementById("itemName").value || "Article";
+      const price = parseFloat(document.getElementById("itemPrice").value) || 0;
+      caisse.addItem(name, price); // Ajoute article
+      render(); // Mise à jour affichage
+    };
+
+    document.getElementById("applyDiscountBtn").onclick = () => {
+      const d = parseFloat(document.getElementById("discountPercent").value) || 0;
+      caisse.setDiscountRateFromPercent(d); // Applique réduction
+      render();
+    };
+
+    document.getElementById("resetDiscountBtn").onclick = () => {
+      caisse.resetDiscount(); // Réinitialise réduction
+      render();
+    };
+
+    document.getElementById("payBtn").onclick = () => {
+      const c = parseFloat(document.getElementById("cashGiven").value) || 0;
+      const r = caisse.pay(c); // Vérifie paiement
+      showMessage(r.msg, r.ok); // Affiche message
+    };
+
+    document.getElementById("clearCartBtn").onclick = () => {
+      caisse.clearCart(); // Vide panier
+      render();
+    };
+
+    window.removeItem = (i) => {
+      caisse.removeItem(i); // Supprime article
+      render();
+    };
+
+    render(); // Affiche panier vide au démarrage
+  </script>
+</body>
+</html>

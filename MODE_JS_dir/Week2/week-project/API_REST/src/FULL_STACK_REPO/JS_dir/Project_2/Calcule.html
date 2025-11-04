@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en"> <!-- نوع الوثيقة HTML -->
+<head>
+  <meta charset="UTF-8"> <!-- الترميز UTF-8 -->
+  <title>Calculator</title> <!-- العنوان اللي يبان فالتاب -->
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-image: url("https://www.espace-aubade.fr/uploads/blog/picture/633x411/2020-03-24-comment-calculer-une-surface-de-carrelage-une.jpg");
+      background-repeat : no-repeat;
+      background-size: cover; /* تخلي الصورة تغطي الشاشة كاملة */
+    }
+    #wrapper { /* حHistorique */
+      border: 2px solid #555; /* إطار رمادي */
+      padding: 10px; /* مسافة داخلية */
+      border-radius: 10px; /* زوايا مدورة */
+      background: #333; /* خلفية غامقة */
+      display: flex; /* العناصر فليكس */
+      gap: 20px; /* المسافة بين الكالكولاتريس والتاريخ */
+    }
+    #calculator { /* الكالكولاتريس */
+      background: #222; /* لون الخلفية غامق */
+      color: white; /* النص أبيض */
+      padding: 20px; /* مسافة داخلية */
+      border-radius: 10px; /* زوايا مدورة */
+      display: grid; /* نستعمل غريد */
+      grid-template-rows: auto 1fr; /* الصف الأول العرض، والثاني الأزرار */
+      width: 260px; /* العرض */
+    }
+    #display { /* الشاشة اللي كيبان فيها الرقم */
+      background: rgb(120, 107, 107); /* خلفية سوداء */
+      font-size: 2rem; /* حجم الخط كبير */
+      padding: 10px; /* مسافة داخلية */
+      text-align: right; /* نص فاليمين */
+      border-radius: 5px; /* زوايا مدورة */
+      margin-bottom: 10px; /* مسافة تحت */
+      overflow-x: auto; /* إلا الرقم طويل يتحرك */
+    }
+    #keys { /* الأزرار */
+      display: grid; /* غريد */
+      grid-template-columns: repeat(4, 1fr); /* 4 أعمدة متساويين */
+      gap: 10px; /* مسافة بين الأزرار */
+    }
+    button { /* الأزرار كاملين */
+      font-size: 1.2rem;
+      padding: 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button[data-type="operator"] { background: orange; color: black; } /* زر العمليات */
+    button[data-type="command"] { background: gray; } /* زر الأوامر (AC, CE...) */
+    button[data-type="digit"],
+    button[data-type="decimal"] { background: #444; color: white; } /* الأرقام والنقطة */
+    button[data-type="equals"] { background: green; color: white; } /* زر = */
+
+    /* historique */
+    #history {
+      width: 150px;
+      background: #29085a;
+      color: white;
+      border-radius: 10px;
+      padding: 10px;
+      overflow-y: auto;
+      max-height: 300px;
+    }
+    #history h3 {
+      margin-top: 0;
+      font-size: 1.2rem;
+      text-align: center;
+    }
+    #history ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    #history li {
+      padding: 5px;
+      border-bottom: 1px solid #444;
+    }
+  </style>
+</head>
+<body>
+  <div id="wrapper"> <!-- الحاوية العامة -->
+    <div id="calculator"> <!-- الكالكولاتريس -->
+      <div id="display">0</div> <!-- الشاشة اللي كيبان فيها الرقم -->
+      <div id="keys"> <!-- الأزرار -->
+        <!-- الصف 1 -->
+        <button data-type="command" data-key="AC">AC</button>
+        <button data-type="command" data-key="CE">CE</button>
+        <button data-type="command" data-key="±">±</button>
+        <button data-type="command" data-key="%">%</button>
+        <!-- الصف 2 -->
+        <button data-type="digit">7</button>
+        <button data-type="digit">8</button>
+        <button data-type="digit">9</button>
+        <button data-type="operator">÷</button>
+        <!-- الصف 3 -->
+        <button data-type="digit">4</button>
+        <button data-type="digit">5</button>
+        <button data-type="digit">6</button>
+        <button data-type="operator">×</button>
+        <!-- الصف 4 -->
+        <button data-type="digit">1</button>
+        <button data-type="digit">2</button>
+        <button data-type="digit">3</button>
+        <button data-type="operator">-</button>
+        <!-- الصف 5 -->
+        <button data-type="digit">0</button>
+        <button data-type="decimal">.</button>
+        <button data-type="equals">=</button>
+        <button data-type="operator">+</button>
+      </div>
+    </div>
+
+    <!-- التاريخ -->
+    <div id="history">
+      <h3>History</h3>
+      <ul id="historyList"></ul>
+    </div>
+  </div>
+
+  <script>
+    const displayEl = document.getElementById("display"); // الشاشة
+    const keysEl = document.getElementById("keys"); // الأزرار
+    const historyList = document.getElementById("historyList"); // لائحة التاريخ
+
+    let state = {
+      current: "0",
+      previous: null,
+      operator: null,
+      overwrite: false,
+    };
+
+    let historyEl = []; // نخزن العمليات
+
+    // --- الضغط على الأزرار
+    keysEl.addEventListener("click", (event) => {
+      const button = event.target.closest("button");
+      if (!button) return;
+      handleClick(button);
+    });
+
+    function handleClick(button) {
+      const type = button.dataset.type;
+      const value = button.textContent;
+
+      if (type === "digit") inputDigit(value);
+      if (type === "decimal") inputDecimal();
+      if (type === "operator") chooseOperator(value);
+      if (type === "equals") evaluate();
+      if (type === "command") handleCommand(value);
+
+      updateDisplay();
+    }
+
+    // --- الأرقام
+    function inputDigit(digit) {
+      if (state.overwrite) {
+        state.current = digit;
+        state.overwrite = false;
+      } else {
+        state.current = state.current === "0" ? digit : state.current + digit;
+      }
+    }
+
+    function inputDecimal() {
+      if (state.overwrite) {
+        state.current = "0.";
+        state.overwrite = false;
+        return;
+      }
+      if (!state.current.includes(".")) {
+        state.current += ".";
+      }
+    }
+
+    // --- العمليات
+    function chooseOperator(op) {
+      if (state.previous !== null && state.operator && !state.overwrite) {
+        evaluate();
+      }
+      state.operator = op;
+      state.previous = state.current;
+      state.overwrite = true;
+    }
+
+    function evaluate() {
+      if (state.operator === null || state.previous === null) return;
+
+      const curr = parseFloat(state.current);
+      const prev = parseFloat(state.previous);
+      let result = 0;
+
+      switch (state.operator) {
+        case "+": result = prev + curr; break;
+        case "-": result = prev - curr; break;
+        case "×": result = prev * curr; break;
+        case "÷": result = curr === 0 ? "Error" : prev / curr; break;
+      }
+
+      // 👇 نخزن العملية قبل ما نصفر operator
+      const operation = `${prev} ${state.operator} ${curr} = ${result}`;
+
+      state.current = result.toString();
+      state.previous = null;
+      state.operator = null;
+      state.overwrite = true;
+
+      historyEl.push(operation);
+      if (historyEl.length > 5) historyEl.shift();
+      updateHistory();
+    }
+
+    // --- أوامر
+    function handleCommand(cmd) {
+      switch (cmd) {
+        case "AC":
+          state = { current: "0", previous: null, operator: null, overwrite: false };
+          break;
+        case "CE":
+          state.current = "0";
+          break;
+        case "±":
+          if (state.current !== "0") {
+            state.current = (parseFloat(state.current) * -1).toString();
+          }
+          break;
+        case "%":
+          state.current = (parseFloat(state.current) / 100).toString();
+          break;
+      }
+    }
+
+    function updateDisplay() {
+      displayEl.textContent = state.current;
+    }
+
+    function updateHistory() {
+      historyList.innerHTML = "";
+      historyEl.forEach((item) => {
+        const li = document.createElement("li");
+        li.textContent = item;
+        historyList.appendChild(li);
+      });
+    }
+  </script>
+</body>
+</html>
